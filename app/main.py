@@ -3,7 +3,7 @@ import psycopg2
 import time
 import os
 
-from parser import parce_save_products
+from parser import parse_save_products
 from database import create_database
 from settings import URLS_TO_SCRAPE, DB_CONFIG, TABLE_NAME
 
@@ -16,7 +16,7 @@ def main() -> None:
         with httpx.Client(timeout=60) as client:
             for name, url in URLS_TO_SCRAPE.items():
                 print(">>>", name, url)
-                parce_save_products(client, url, conn)
+                parse_save_products(client, url, conn)
 
 
 if __name__ == "__main__":
