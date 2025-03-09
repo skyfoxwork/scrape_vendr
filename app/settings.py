@@ -22,7 +22,9 @@ URL = "https://www.vendr.com/"
 # url to scrape
 URL_DEVOPS = "https://www.vendr.com/categories/devops"
 URL_IT_INFRASTRUCTURE = "https://www.vendr.com/categories/it-infrastructure"
-URL_DATA_ANALYTICS_MANAGEMENT = "https://www.vendr.com/categories/data-analytics-and-management"
+URL_DATA_ANALYTICS_MANAGEMENT = (
+    "https://www.vendr.com/categories/data-analytics-and-management"
+)
 
 
 URLS_TO_SCRAPE = {
