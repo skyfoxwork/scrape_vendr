@@ -30,10 +30,22 @@ df_scrape/
 
 ## Requirements
 - httpx
-- threading
-- BeautifulSoup4
 - psycopg2
-- dotenv
+- BeautifulSoup4
+- python-dotenv
+
+Required Python libraries listed in `requirements.txt`
+
+## Features
+
+- **Automated Web Scraping** – Extracts product data from [Vendr](https://www.vendr.com/) across multiple categories.
+- **Multi-threading for Performance** – Uses threading to speed up the data extraction process.
+- **Database Integration** – Stores extracted data in a PostgreSQL database.
+- **JSONB Storage for Price Ranges** – Saves structured price data in a flexible JSONB format.
+- **Environment Variable Support** – Securely configures database credentials using a `.env` file.
+- **Modular Codebase** – Organized structure with separate modules for database operations, parsing, and configuration.
+- **Error Handling** – Basic exception handling to ensure stability during scraping.
+- **Logging & Progress Updates** – Prints real-time updates on categories, product counts, and execution time.
 
 ## Installation
 
