@@ -38,11 +38,12 @@ def save_to_db(data, conn) -> None:
 def print_data(table_name: str) -> None:
     with psycopg2.connect(**DB_CONFIG) as conn:
         with conn.cursor() as cursor:
-            cursor.execute(f"SELECT * FROM {TABLE_NAME}")
+            cursor.execute(f"SELECT * FROM {table_name}")
             rows = cursor.fetchall()
             for row in rows:
                 print(row)
-            print(len(rows))
+            print("-" * 50)
+            print("total number of elements:", len(rows))
 
 
 if __name__ == "__main__":
