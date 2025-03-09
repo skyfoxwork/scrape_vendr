@@ -1,7 +1,11 @@
-# "df_scrap"
+# "scrape_vendr"
 
 Python project that scrapes product data from specific categories on the website [Vendr](https://www.vendr.com/),
 parses relevant information about each product, and saves it into a PostgreSQL database.
+Links that the project scrapes:
+[DevOps](https://www.vendr.com/categories/devops),
+[IT Infrastructure](https://www.vendr.com/categories/it-infrastructure),
+[Data Analytics and Management](https://www.vendr.com/categories/data-analytics-and-management)
 
 ## Description
 The project:
