@@ -35,6 +35,14 @@ def save_to_db(data, conn) -> None:
     cursor.close()
 
 
+def print_total_number_of_data(table_name: str) -> None:
+    with psycopg2.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            total_number = cursor.fetchall()[0][0]
+    return total_number
+
+
 def print_data(table_name: str) -> None:
     with psycopg2.connect(**DB_CONFIG) as conn:
         with conn.cursor() as cursor:
