@@ -33,6 +33,7 @@ df_scrape/
 - threading
 - BeautifulSoup4
 - psycopg2
+- dotenv
 
 ## Installation
 
@@ -78,19 +79,24 @@ CREATE USER <your_db_user> WITH PASSWORD <your_db_password>;
 
 ```
 
-The script automatically creates a database table to store the product data. Ensure that your PostgreSQL database is running before executing the script.
+The script automatically creates a database table (default name: products) to store the product data. Ensure that your PostgreSQL database is running before executing the script.
+
+If you need to change default name of table change TABLE_NAME in settings.py file.
 
 5. Clone the repository.
 
-main branch:
 ```shell
-git clone https://github.com/skyfoxwork/df_scrap/tree/task1
+git clone https://github.com/skyfoxwork/df_scrap.git
 ```
 
 6. Navigate to the project directory:
 
 ```shell
 cd df_scrap
+```
+
+```shell
+git checkout task1
 ```
 
 7. Create virtual environment:
@@ -147,3 +153,10 @@ POSTGRES_DB_PORT=<your_db_port>
 ```shell
 python3 app/main.py
 ```
+
+12. To see scraped data from database use:
+```shell
+python3 app/database.py
+```
+
+if you need change default settings in project use settings.py file
