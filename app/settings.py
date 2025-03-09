@@ -14,7 +14,7 @@ DB_CONFIG = {
 }
 
 
-TABLE_NAME = "products_six"
+TABLE_NAME = "products"
 
 # main url
 URL = "https://www.vendr.com/"
