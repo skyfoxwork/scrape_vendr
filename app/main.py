@@ -11,11 +11,15 @@ from settings import URLS_TO_SCRAPE, DB_CONFIG, TABLE_NAME
 def main() -> None:
     with psycopg2.connect(**DB_CONFIG) as conn:
         create_database(conn)
-        print(f"Database: ({os.getenv("POSTGRES_DB_NAME")}) created with table name: ({TABLE_NAME})")
+        print(
+            f"Database: ({os.getenv('POSTGRES_DB_NAME')}) "
+            f"is created with table name: ({TABLE_NAME})",
+            "\n"
+        )
 
         with httpx.Client(timeout=60) as client:
             for name, url in URLS_TO_SCRAPE.items():
-                print(">>>", name, url)
+                print(">>>", name, url, "\n")
                 parse_save_products(client, url, conn)
 
 
