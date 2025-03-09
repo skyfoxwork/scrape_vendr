@@ -4,7 +4,7 @@ import time
 import os
 
 from parser import parse_save_products
-from database import create_database
+from database import create_database, print_total_number_of_data
 from settings import URLS_TO_SCRAPE, DB_CONFIG, TABLE_NAME
 
 
@@ -26,4 +26,6 @@ def main() -> None:
 if __name__ == "__main__":
     start = time.time()
     main()
-    print("run time: ", time.time() - start)
+    print("-" * 50)
+    print("total number of products:", print_total_number_of_data(TABLE_NAME))
+    print("run time:", time.time() - start)
