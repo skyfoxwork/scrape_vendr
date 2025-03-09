@@ -25,7 +25,12 @@ def save_to_db(data, conn) -> None:
     cursor.execute(f"""
         INSERT INTO {TABLE_NAME} (name, category, price_range, description)
         VALUES (%s, %s, %s, %s)
-    """, (data.product_name, data.category, json.dumps(data.price_range), data.description))
+    """, (
+        data.product_name,
+        data.category,
+        json.dumps(data.price_range),
+        data.description
+    ))
     conn.commit()
     cursor.close()
 
@@ -33,7 +38,7 @@ def save_to_db(data, conn) -> None:
 def print_data(table_name: str) -> None:
     with psycopg2.connect(**DB_CONFIG) as conn:
         with conn.cursor() as cursor:
-            cursor.execute(f"SELECT * FROM {table_name}")
+            cursor.execute(f"SELECT * FROM {TABLE_NAME}")
             rows = cursor.fetchall()
             for row in rows:
                 print(row)
