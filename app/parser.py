@@ -6,7 +6,7 @@ import httpx
 from bs4 import BeautifulSoup
 
 from database import save_to_db
-from settings import URL
+import settings
 
 
 @dataclass
@@ -17,21 +17,29 @@ class Product:
     description: str | None
 
 
-def parse_single_product(product: BeautifulSoup, category_name: str) -> Product:
+def parse_single_product(
+        product: BeautifulSoup,
+        category_name: str
+) -> Product:
     """
     This function parse single product, write it to Product dataclass
     and return Product dataclass
     """
-    # price_range = None
+    price_range = None
     price = product.find(
         "div",
-        "rt-Flex rt-r-fd-column xs:rt-r-fd-row xs:rt-r-ai-center xs:rt-r-jc-space-between rt-r-gap-5"
+        (
+            "rt-Flex rt-r-fd-column xs:rt-r-fd-row xs:"
+            "rt-r-ai-center xs:rt-r-jc-space-between rt-r-gap-5"
+        )
     )
 
     if price:
         low = product.find("span", "v-fw-600 v-fs-12")
         medium = product.find("div", "rt-Flex _rangeAverage_118fo_42")
-        height = product.find("span", "_rangeSliderLastNumber_118fo_38 v-fw-600 v-fs-12")
+        height = product.find(
+            "span", "_rangeSliderLastNumber_118fo_38 v-fw-600 v-fs-12"
+        )
         price_range = {
             "low": low.text.split("$")[-1] if low else None,
             "medium": medium.text.split("$")[-1] if medium else None,
@@ -55,7 +63,8 @@ def send_request_get_product_links(
         all_product_urls: list
 ) -> None:
     """
-    This function is a thread that send request, get product links and save links to list for each page
+    This function is a thread that send request,
+    get product links and save links to list for page
     """
     next_url = list(category)
     next_url[-1] = str(page)
@@ -63,7 +72,7 @@ def send_request_get_product_links(
     text = response.content
     soup = BeautifulSoup(text, "html.parser")
     links = soup.find_all("a", "_card_j928a_9 _card_1u7u9_1 _cardLink_1q928_1")
-    product_urls = [URL + link.get("href")[1:] for link in links]
+    product_urls = [settings.URL + link.get("href")[1:] for link in links]
     all_product_urls += product_urls
 
 
@@ -74,7 +83,8 @@ def send_request_parse_single_product(
         category_name: str
 ):
     """
-    This function is a thread that send request, parse single product and write it to queue.Queues
+    This function is a thread that send request,
+    parse single product and write it to queue.Queues
     """
     response = client.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
@@ -83,13 +93,13 @@ def send_request_parse_single_product(
 
 def save_data(data_queue: queue.Queue, db_connection) -> None:
     """
-    This function is a thread that get Product from queue.Queue, save it to database
+    This function is a thread that get Product from queue.Queue,
+    save it to database
     and exits the thread if None is the last one in queue.Queue
     """
     while True:
         data = data_queue.get()
         if data is None:
-            print("Received termination signal, stopping thread.")
             data_queue.task_done()
             break
 
@@ -97,7 +107,9 @@ def save_data(data_queue: queue.Queue, db_connection) -> None:
         data_queue.task_done()
 
 
-def get_product_urls(category: str, soup: BeautifulSoup, client: httpx.Client) -> list:
+def get_product_urls(
+        category: str, soup: BeautifulSoup, client: httpx.Client
+) -> list:
     """
     This function find product urls on first page and
     create Threads to find product urls on other pages
@@ -107,7 +119,7 @@ def get_product_urls(category: str, soup: BeautifulSoup, client: httpx.Client) -
     # find product urls first page
     all_product_urls = []
     links = soup.find_all("a", "_card_j928a_9 _card_1u7u9_1 _cardLink_1q928_1")
-    product_urls = [URL + link.get("href")[1:] for link in links]
+    product_urls = [settings.URL + link.get("href")[1:] for link in links]
     all_product_urls += product_urls
 
     # find number of pages
@@ -134,17 +146,29 @@ def get_product_urls(category: str, soup: BeautifulSoup, client: httpx.Client) -
     return all_product_urls
 
 
-def parse_save_to_db_product_data(all_product_urls: list, client: httpx.Client, db_connection, category_name):
+def parse_save_to_db_product_data(
+        all_product_urls: list,
+        client: httpx.Client,
+        db_connection,
+        category_name
+) -> None:
     """
-    This function create threads to parse products urls
+    This function take products urls, create threads to parse products urls
     and create one thread to save Products to database
+
+    use queue.Queue() for threading communication
+    all thread put Products to data_queue
+    one thread get Products from data_queue and save Product ot database
     """
-    # find, parce and write products to db
+
     data_queue = queue.Queue()
     tasks = []
 
     # write product to db thread run
-    db_thread = threading.Thread(target=save_data, args=(data_queue, db_connection))
+    db_thread = threading.Thread(
+        target=save_data,
+        args=(data_queue, db_connection)
+    )
     db_thread.start()
 
     # parse products threads run
@@ -165,7 +189,11 @@ def parse_save_to_db_product_data(all_product_urls: list, client: httpx.Client, 
     db_thread.join()
 
 
-def parse_save_products(client: httpx.Client, url: str, db_connection) -> list[Product]:
+def parse_save_products(
+        client: httpx.Client,
+        url: str,
+        db_connection
+) -> list[Product]:
     """
     The main function that parse one product link and save product to database
     For example: DevOps, It infrastructure or data analytics management product
@@ -174,23 +202,25 @@ def parse_save_products(client: httpx.Client, url: str, db_connection) -> list[P
     # find category urls
     response = client.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-    links = soup.find_all("a", "rt-Text rt-reset rt-Link rt-r-size-2 rt-underline-auto")
-    category_urls = [URL + link.get("href")[1:] for link in links]
+    links = soup.find_all(
+        "a", "rt-Text rt-reset rt-Link rt-r-size-2 rt-underline-auto"
+    )
+    category_urls = [settings.URL + link.get("href")[1:] for link in links]
 
     # parse categories
     for category in category_urls:
-        print("category url:", category)
-
         text = client.get(category).content
         soup = BeautifulSoup(text, "html.parser")
 
-        # find category name
         category_name = soup.find("h1", "rt-Heading rt-r-size-6").text
         print("category name:", category_name)
+        print("category url:", category)
 
-        # find product urls
         product_urls = get_product_urls(category, soup, client)
         print("number of products:", len(product_urls))
         print("parsing process ...")
 
-        parse_save_to_db_product_data(product_urls, client, db_connection, category_name)
+        parse_save_to_db_product_data(
+            product_urls, client, db_connection, category_name
+        )
+        print("Done", "\n")
