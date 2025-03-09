@@ -33,6 +33,7 @@ df_scrape/
 - psycopg2
 - BeautifulSoup4
 - python-dotenv
+- flake8
 
 Required Python libraries listed in `requirements.txt`
 
