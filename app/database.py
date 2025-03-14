@@ -1,6 +1,5 @@
 import json
 import psycopg2
-
 from settings import DB_CONFIG, TABLE_NAME
 
 

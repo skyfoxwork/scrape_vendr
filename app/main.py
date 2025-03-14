@@ -1,7 +1,8 @@
+import os
+import time
+
 import httpx
 import psycopg2
-import time
-import os
 
 from parser import parse_save_products
 from database import create_database, print_total_number_of_data
