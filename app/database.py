@@ -1,12 +1,12 @@
 import json
 import psycopg2
-from settings import DB_CONFIG, TABLE_NAME
+from config import settings
 
 
 def create_database(conn):
     cursor = conn.cursor()
     cursor.execute(f"""
-        CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
+        CREATE TABLE IF NOT EXISTS {settings.TABLE_NAME} (
             id SERIAL PRIMARY KEY,
             name TEXT,
             category TEXT,
@@ -22,7 +22,8 @@ def save_to_db(data, conn) -> None:
     cursor = conn.cursor()
 
     cursor.execute(f"""
-        INSERT INTO {TABLE_NAME} (name, category, price_range, description)
+        INSERT INTO {settings.TABLE_NAME}
+        (name, category, price_range, description)
         VALUES (%s, %s, %s, %s)
     """, (
         data.product_name,
@@ -35,7 +36,7 @@ def save_to_db(data, conn) -> None:
 
 
 def print_total_number_of_data(table_name: str) -> None:
-    with psycopg2.connect(**DB_CONFIG) as conn:
+    with psycopg2.connect(**settings.DB_CONFIG) as conn:
         with conn.cursor() as cursor:
             cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
             total_number = cursor.fetchall()[0][0]
@@ -43,7 +44,7 @@ def print_total_number_of_data(table_name: str) -> None:
 
 
 def print_data(table_name: str) -> None:
-    with psycopg2.connect(**DB_CONFIG) as conn:
+    with psycopg2.connect(**settings.DB_CONFIG) as conn:
         with conn.cursor() as cursor:
             cursor.execute(f"SELECT * FROM {table_name}")
             rows = cursor.fetchall()
@@ -54,4 +55,4 @@ def print_data(table_name: str) -> None:
 
 
 if __name__ == "__main__":
-    print_data(TABLE_NAME)
+    print_data(settings.TABLE_NAME)
