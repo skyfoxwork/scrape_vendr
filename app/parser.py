@@ -43,7 +43,7 @@ def parse_single_product(
         price_range = {
             "low": low.text.split("$")[-1] if low else None,
             "medium": medium.text.split("$")[-1] if medium else None,
-            "height": height.text.split("$")[-1] if height else None
+            "high": height.text.split("$")[-1] if height else None
         }
 
     product_name = product.find("h1")
