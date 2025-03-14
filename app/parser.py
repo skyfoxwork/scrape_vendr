@@ -1,12 +1,13 @@
 import queue
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
 import httpx
 from bs4 import BeautifulSoup
 
 from database import save_to_db
-import settings
+from config import settings
 
 
 @dataclass
@@ -86,7 +87,9 @@ def send_request_parse_single_product(
     This function is a thread that send request,
     parse single product and write it to queue.Queues
     """
+    print("send request")
     response = client.get(url)
+    print("received response")
     soup = BeautifulSoup(response.content, "html.parser")
     data_queue.put(parse_single_product(soup, category_name))
 
@@ -103,6 +106,7 @@ def save_data(data_queue: queue.Queue, db_connection) -> None:
             data_queue.task_done()
             break
 
+        print("save to db")
         save_to_db(data, db_connection)
         data_queue.task_done()
 
@@ -130,18 +134,15 @@ def get_product_urls(
             number_of_pages = int(page_info.text.split()[-1])
             print("number of pages:", number_of_pages)
 
-    # find product urls on other pages with Thread
-    task_all_product = []
-    for page in range(2, number_of_pages + 1):
-        task_all_product.append(
-            threading.Thread(
-                target=send_request_get_product_links,
-                args=(page, category, client, all_product_urls))
-        )
-        task_all_product[-1].start()
-
-    for task in task_all_product:
-        task.join()
+    # parse product urls threads run with max number of threads
+    with ThreadPoolExecutor(
+            max_workers=settings.NUMBER_OF_THREADS
+    ) as executor:
+        for page in range(2, number_of_pages + 1):
+            executor.submit(
+                send_request_get_product_links,
+                page, category, client, all_product_urls
+            )
 
     return all_product_urls
 
@@ -150,7 +151,7 @@ def parse_save_to_db_product_data(
         all_product_urls: list,
         client: httpx.Client,
         db_connection,
-        category_name
+        category_name: str
 ) -> None:
     """
     This function take products urls, create threads to parse products urls
@@ -162,7 +163,6 @@ def parse_save_to_db_product_data(
     """
 
     data_queue = queue.Queue()
-    tasks = []
 
     # write product to db thread run
     db_thread = threading.Thread(
@@ -171,18 +171,15 @@ def parse_save_to_db_product_data(
     )
     db_thread.start()
 
-    # parse products threads run
-    for product_url in all_product_urls:
-        tasks.append(
-            threading.Thread(
-                target=send_request_parse_single_product,
-                args=(product_url, client, data_queue, category_name)
+    # parse products threads run with max number of threads
+    with ThreadPoolExecutor(
+            max_workers=settings.NUMBER_OF_THREADS
+    ) as executor:
+        for product_url in all_product_urls:
+            executor.submit(
+                send_request_parse_single_product,
+                product_url, client, data_queue, category_name
             )
-        )
-        tasks[-1].start()
-
-    for task in tasks:
-        task.join()
 
     # stop thread that write product to db
     data_queue.put(None)
