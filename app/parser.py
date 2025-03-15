@@ -73,7 +73,8 @@ def send_request_get_product_links(
     logger.debug(f"Sending request page number: {page}")
     response = client.get("".join(next_url))
     logger.debug(
-        f"got response for request pager number {page}, status code {response.status_code}"
+        f"got response for request pager number {page}, "
+        f"status code {response.status_code}"
     )
     text = response.content
     soup = BeautifulSoup(text, "html.parser")
