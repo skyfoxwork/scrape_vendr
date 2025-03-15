@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 from database import save_to_db
 from config import settings
+from app_logging import logger
 
 
 @dataclass
@@ -81,15 +82,16 @@ def send_request_parse_single_product(
         url: str,
         client: httpx.Client,
         data_queue: queue.Queue,
-        category_name: str
+        category_name: str,
+        count: int
 ):
     """
     This function is a thread that send request,
     parse single product and write it to queue.Queues
     """
-    print("send request")
+    logger.debug(f"Sending request: {count}")
     response = client.get(url)
-    print("received response")
+    logger.debug(f"got response for request {count}, status code {response.status_code}")
     soup = BeautifulSoup(response.content, "html.parser")
     data_queue.put(parse_single_product(soup, category_name))
 
@@ -103,11 +105,13 @@ def save_data(data_queue: queue.Queue, db_connection) -> None:
     while True:
         data = data_queue.get()
         if data is None:
+            logger.debug("db: Received termination signal, stopping thread.")
             data_queue.task_done()
             break
 
-        print("save to db")
+        logger.debug(f"db: Saving to DB: {data.product_name}")
         save_to_db(data, db_connection)
+        logger.debug(f"db: Saving to DB: {data.product_name} done")
         data_queue.task_done()
 
 
@@ -117,7 +121,7 @@ def get_product_urls(
     """
     This function find product urls on first page and
     create Threads to find product urls on other pages
-    and return product urls
+    and return product urls list
     """
 
     # find product urls first page
@@ -132,7 +136,7 @@ def get_product_urls(
         page_info = prev_button.find_next_sibling("span")
         if page_info:
             number_of_pages = int(page_info.text.split()[-1])
-            print("number of pages:", number_of_pages)
+            logger.info(f"number of pages: {number_of_pages}")
 
     # parse product urls threads run with max number of threads
     with ThreadPoolExecutor(
@@ -175,10 +179,10 @@ def parse_save_to_db_product_data(
     with ThreadPoolExecutor(
             max_workers=settings.NUMBER_OF_THREADS
     ) as executor:
-        for product_url in all_product_urls:
+        for number, product_url in enumerate(all_product_urls):
             executor.submit(
                 send_request_parse_single_product,
-                product_url, client, data_queue, category_name
+                product_url, client, data_queue, category_name, number
             )
 
     # stop thread that write product to db
@@ -210,14 +214,16 @@ def parse_save_products(
         soup = BeautifulSoup(text, "html.parser")
 
         category_name = soup.find("h1", "rt-Heading rt-r-size-6").text
-        print("category name:", category_name)
-        print("category url:", category)
+        # print("category name:", category_name)
+        # print("category url:", category)
+        logger.info(f"category name: {category_name}")
+        logger.info(f"category url: {category}")
 
         product_urls = get_product_urls(category, soup, client)
-        print("number of products:", len(product_urls))
-        print("parsing process ...")
+        logger.info(f"number of products: {len(product_urls)}")
+        logger.info("parsing process ...")
 
         parse_save_to_db_product_data(
             product_urls, client, db_connection, category_name
         )
-        print("Done", "\n")
+        logger.info("Done\n")

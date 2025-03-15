@@ -1,5 +1,6 @@
 import json
 import psycopg2
+from app_logging import logger
 from config import settings
 
 
@@ -35,7 +36,7 @@ def save_to_db(data, conn) -> None:
     cursor.close()
 
 
-def print_total_number_of_data(table_name: str) -> None:
+def get_total_number_of_data(table_name: str) -> int:
     with psycopg2.connect(**settings.DB_CONFIG) as conn:
         with conn.cursor() as cursor:
             cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
@@ -49,9 +50,9 @@ def print_data(table_name: str) -> None:
             cursor.execute(f"SELECT * FROM {table_name}")
             rows = cursor.fetchall()
             for row in rows:
-                print(row)
-            print("-" * 50)
-            print("total number of elements:", len(rows))
+                logger.info(row)
+            logger.info("-" * 50)
+            logger.info(f"total number of elements: {len(rows)}")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 import os
-import logging
 from dotenv import load_dotenv
 
 
@@ -7,13 +6,14 @@ load_dotenv()
 
 
 class Settings:
+    PROJECT_NAME: str = "scrape_vendr"
+
     # Postgres settings
     POSTGRES_DB_NAME: str = os.getenv("POSTGRES_DB_NAME")
     POSTGRES_USER: str = os.getenv("POSTGRES_USER")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD")
     POSTGRES_HOST: str = os.getenv("POSTGRES_HOST")
     POSTGRES_DB_PORT: str = os.getenv("POSTGRES_DB_PORT")
-
     DB_CONFIG: dict = {
         "dbname": POSTGRES_DB_NAME,
         "user": POSTGRES_USER,
@@ -21,6 +21,8 @@ class Settings:
         "host": POSTGRES_HOST,
         "port": POSTGRES_DB_PORT
     }
+
+    TABLE_NAME: str = "products_new"
 
     # URL settings
     URL: str = "https://www.vendr.com/"
@@ -38,9 +40,13 @@ class Settings:
         "data_analytics_management": URL_DATA_ANALYTICS_MANAGEMENT
     }
 
-    NUMBER_OF_THREADS: int = 100
+    # Logging settings
+    LOGGING_DEBUG: bool = False
+    LOGGING_FILE_NAME: str = f"{PROJECT_NAME}.log"
+    LOGGING_WRITE_TO_FILE: bool = False
+    LOGGING_PRINT_TO_SCREEN: bool = True
 
-    TABLE_NAME: str = "products_new"
+    NUMBER_OF_THREADS: int = 100
 
 
 settings = Settings()
