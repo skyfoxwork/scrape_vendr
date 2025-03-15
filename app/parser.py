@@ -91,7 +91,9 @@ def send_request_parse_single_product(
     """
     logger.debug(f"Sending request: {count}")
     response = client.get(url)
-    logger.debug(f"got response for request {count}, status code {response.status_code}")
+    logger.debug(
+        f"got response for request {count}, status code {response.status_code}"
+    )
     soup = BeautifulSoup(response.content, "html.parser")
     data_queue.put(parse_single_product(soup, category_name))
 
