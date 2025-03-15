@@ -216,8 +216,6 @@ def parse_save_products(
         soup = BeautifulSoup(text, "html.parser")
 
         category_name = soup.find("h1", "rt-Heading rt-r-size-6").text
-        # print("category name:", category_name)
-        # print("category url:", category)
         logger.info(f"category name: {category_name}")
         logger.info(f"category url: {category}")
 
