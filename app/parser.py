@@ -62,7 +62,7 @@ def send_request_get_product_links(
         page: int,
         category: str,
         client: httpx.Client,
-        all_product_urls: list
+        all_product_urls: list,
 ) -> None:
     """
     This function is a thread that send request,
@@ -70,7 +70,11 @@ def send_request_get_product_links(
     """
     next_url = list(category)
     next_url[-1] = str(page)
+    logger.debug(f"Sending request page number: {page}")
     response = client.get("".join(next_url))
+    logger.debug(
+        f"got response for request pager number {page}, status code {response.status_code}"
+    )
     text = response.content
     soup = BeautifulSoup(text, "html.parser")
     links = soup.find_all("a", "_card_j928a_9 _card_1u7u9_1 _cardLink_1q928_1")
