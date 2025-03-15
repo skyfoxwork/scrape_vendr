@@ -41,8 +41,8 @@ class Settings:
     }
 
     # Logging settings
-    LOGGING_DEBUG: bool = True
-    LOGGING_WRITE_TO_FILE: bool = True
+    LOGGING_DEBUG: bool = False
+    LOGGING_WRITE_TO_FILE: bool = False
     LOGGING_FILE_NAME: str = f"{PROJECT_NAME}.log"
 
     NUMBER_OF_THREADS: int = 100
