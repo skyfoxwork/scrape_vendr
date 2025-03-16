@@ -1,0 +1,59 @@
+import json
+import psycopg2
+from app_logging import logger
+from config import settings
+
+
+def create_database(conn):
+    cursor = conn.cursor()
+    cursor.execute(f"""
+        CREATE TABLE IF NOT EXISTS {settings.TABLE_NAME} (
+            id SERIAL PRIMARY KEY,
+            name TEXT,
+            category TEXT,
+            price_range JSONB,
+            description TEXT
+        )
+    """)
+    conn.commit()
+    cursor.close()
+
+
+def save_to_db(data, conn) -> None:
+    cursor = conn.cursor()
+
+    cursor.execute(f"""
+        INSERT INTO {settings.TABLE_NAME}
+        (name, category, price_range, description)
+        VALUES (%s, %s, %s, %s)
+    """, (
+        data.product_name,
+        data.category,
+        json.dumps(data.price_range),
+        data.description
+    ))
+    conn.commit()
+    cursor.close()
+
+
+def get_total_number_of_data(table_name: str) -> int:
+    with psycopg2.connect(**settings.DB_CONFIG) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            total_number = cursor.fetchall()[0][0]
+    return total_number
+
+
+def print_data(table_name: str) -> None:
+    with psycopg2.connect(**settings.DB_CONFIG) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM {table_name}")
+            rows = cursor.fetchall()
+            for row in rows:
+                logger.info(row)
+            logger.info("-" * 50)
+            logger.info(f"total number of elements: {len(rows)}")
+
+
+if __name__ == "__main__":
+    print_data(settings.TABLE_NAME)
